@@ -54,7 +54,7 @@ Python File
 
 ```bash
 # Clone and enter the project
-cd 03-codewalk
+cd Code Walk
 
 # Create virtual environment
 python3 -m venv .venv
