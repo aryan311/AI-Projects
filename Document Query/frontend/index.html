@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuQuery |Document Q&A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .file-label:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-msg {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            display: block;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            display: block;
+        }
+
+        .answer-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+            display: none;
+        }
+
+        .answer-text {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .sources {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 1.5rem; }
+            .input-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DocuQuery</h1>
+            <p class="subtitle">AI-Powered Document Intelligence</p>
+        </header>
+
+        <section id="upload-section">
+            <h2><span>📄</span> Upload Knowledge</h2>
+            <div class="card">
+                <label for="file-upload" class="file-label" id="drop-zone">
+                    <span id="file-name-display">Click to upload or drag & drop .txt file</span>
+                    <input type="file" id="file-upload" accept=".txt">
+                </label>
+                <div class="input-group">
+                    <button onclick="handleUpload()" id="upload-btn">
+                        <span>Upload Document</span>
+                        <div class="loader" id="upload-loader"></div>
+                    </button>
+                </div>
+                <div id="upload-status" class="status-msg"></div>
+            </div>
+        </section>
+
+        <section id="ask-section">
+            <h2><span>❓</span> Ask Anything</h2>
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" id="question-input" placeholder="What would you like to know?">
+                    <button onclick="handleAsk()" id="ask-btn">
+                        <span>Ask AI</span>
+                        <div class="loader" id="ask-loader"></div>
+                    </button>
+                </div>
+                <div id="ask-status" class="status-msg"></div>
+                
+                <div id="answer-box" class="answer-box">
+                    <div class="answer-text" id="answer-content"></div>
+                    <div class="sources" id="sources-content"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let currentDocId = "";
+        const API_BASE = "http://localhost:8000";
+
+        const fileInput = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+                fileNameDisplay.style.color = "var(--text-main)";
+            }
+        });
+
+        async function handleUpload() {
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('upload-status');
+            const loader = document.getElementById('upload-loader');
+            const btn = document.getElementById('upload-btn');
+
+            if (!file) {
+                showStatus(statusDiv, "Please select a file first", "error");
+                return;
+            }
+
+            setLoading(btn, loader, true);
+            statusDiv.style.display = "none";
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentDocId = data.document_id;
+                    showStatus(statusDiv, `Success! ${data.filename} processed into ${data.total_chunks} chunks.`, "success");
+                } else {
+                    showStatus(statusDiv, data.detail || "Upload failed", "error");
+                }
+            } catch (err) {
+                showStatus(statusDiv, "Connection error to backend", "error");
+            } finally {
+                setLoading(btn, loader, false);
+            }
+        }
+
+        async function handleAsk() {
+            const question = document.getElementById('question-input').value;
+            const statusDiv = document.getElementById('ask-status');
+            const answerBox = document.getElementById('answer-box');
+            const loader = document.getElementById('ask-loader');
+            const btn = document.getElementById('ask-btn');
+
+            if (!currentDocId) {
+                showStatus(statusDiv, "Please upload a document first", "error");
+                return;
+            }
+            if (!question.trim()) {
+                showStatus(statusDiv, "Please enter a question", "error");
+                return;
+            }
+
+            setLoading(btn, loader, true);
+            statusDiv.style.display = "none";
+            answerBox.style.display = "none";
+
+            try {
+                const response = await fetch(`${API_BASE}/ask`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ document_id: currentDocId, question: question })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('answer-content').textContent = data.answer;
+                    document.getElementById('sources-content').textContent = `Sources: Chunk(s) ${data.sources.join(', ')}`;
+                    answerBox.style.display = "block";
+                } else {
+                    showStatus(statusDiv, data.detail || "Question failed", "error");
+                }
+            } catch (err) {
+                showStatus(statusDiv, "Connection error to backend", "error");
+            } finally {
+                setLoading(btn, loader, false);
+            }
+        }
+
+        function showStatus(elem, msg, type) {
+            elem.textContent = msg;
+            elem.className = `status-msg status-${type}`;
+            elem.style.display = "block";
+        }
+
+        function setLoading(btn, loader, isLoading) {
+            btn.disabled = isLoading;
+            loader.style.display = isLoading ? "block" : "none";
+            btn.querySelector('span').style.opacity = isLoading ? "0.5" : "1";
+        }
+    </script>
+</body>
+</html>
