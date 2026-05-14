@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryPilot - AI Database Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --code-bg: #1e1e2f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1rem;
+            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-main);
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            padding: 0 2rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .examples {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .example-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-chip:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        /* Results Area */
+        #results-area {
+            display: none;
+            margin-top: 2rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .summary-box {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #a5b4fc;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Error state */
+        .error-message {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>QueryPilot</h1>
+        <p class="subtitle">Ask your database questions in plain English</p>
+    </header>
+
+    <div class="container">
+        <div class="glass-panel">
+            <div class="input-group">
+                <input type="text" id="question-input" placeholder="e.g., Which customers spent the most money?" onkeypress="handleKeyPress(event)">
+                <button id="ask-btn" onclick="askQuestion()">Ask</button>
+            </div>
+            
+            <div class="examples">
+                <span class="example-chip" onclick="setQuestion(this.innerText)">Show the top 5 customers by revenue</span>
+                <span class="example-chip" onclick="setQuestion(this.innerText)">What is the total revenue for Gadgets?</span>
+                <span class="example-chip" onclick="setQuestion(this.innerText)">List all products under $20</span>
+            </div>
+
+            <div id="error-box" class="error-message"></div>
+            
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="results-area">
+                <div class="summary-box" id="summary-content">
+                    <!-- AI Summary will appear here -->
+                </div>
+
+                <div class="section-title">Generated SQL</div>
+                <div class="code-block" id="sql-content">
+                    <!-- SQL will appear here -->
+                </div>
+
+                <div class="section-title">Data Results</div>
+                <div style="overflow-x: auto;">
+                    <table id="data-table">
+                        <thead>
+                            <tr id="table-head"></tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Rows will appear here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setQuestion(text) {
+            document.getElementById('question-input').value = text;
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        }
+
+        async function askQuestion() {
+            const input = document.getElementById('question-input').value.trim();
+            if (!input) return;
+
+            // UI Reset
+            document.getElementById('error-box').style.display = 'none';
+            document.getElementById('results-area').style.display = 'none';
+            document.getElementById('results-area').style.opacity = '0';
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('ask-btn').disabled = true;
+            document.getElementById('ask-btn').style.opacity = '0.7';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: input })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to execute query');
+                }
+
+                // Populate Summary
+                document.getElementById('summary-content').innerHTML = `<strong>Summary:</strong> <br> ${data.summary}`;
+                
+                // Populate SQL
+                document.getElementById('sql-content').innerText = data.sql;
+
+                // Populate Table
+                const tableHead = document.getElementById('table-head');
+                const tableBody = document.getElementById('table-body');
+                tableHead.innerHTML = '';
+                tableBody.innerHTML = '';
+
+                if (data.rows && data.rows.length > 0) {
+                    // Headers
+                    const keys = Object.keys(data.rows[0]);
+                    keys.forEach(key => {
+                        const th = document.createElement('th');
+                        th.innerText = key;
+                        tableHead.appendChild(th);
+                    });
+
+                    // Rows
+                    data.rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        keys.forEach(key => {
+                            const td = document.createElement('td');
+                            td.innerText = row[key];
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.innerText = 'No results found.';
+                    tr.appendChild(td);
+                    tableBody.appendChild(tr);
+                }
+
+                // Show Results
+                document.getElementById('loader').style.display = 'none';
+                const resultsArea = document.getElementById('results-area');
+                resultsArea.style.display = 'block';
+                setTimeout(() => {
+                    resultsArea.style.opacity = '1';
+                }, 50);
+
+            } catch (error) {
+                document.getElementById('loader').style.display = 'none';
+                const errorBox = document.getElementById('error-box');
+                errorBox.innerText = error.message;
+                errorBox.style.display = 'block';
+            } finally {
+                document.getElementById('ask-btn').disabled = false;
+                document.getElementById('ask-btn').style.opacity = '1';
+            }
+        }
+    </script>
+</body>
+</html>

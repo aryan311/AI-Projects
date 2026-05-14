@@ -1,0 +1,109 @@
+Metadata-Version: 2.4
+Name: codewalk
+Version: 0.1.0
+Summary: A Python code explanation tool using AST static analysis and optional LLM integration
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: typer[all]>=0.9.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: httpx>=0.25.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+
+# CodeWalk
+
+CodeWalk is a Python code explanation tool that uses static analysis before asking an LLM to explain anything. It parses Python files with `ast`, extracts structure, identifies risks, and generates a Markdown walkthrough.
+
+## Why This Project Exists
+
+Most code explainers send raw code to an LLM and hope the explanation is correct. CodeWalk uses deterministic Python analysis first, then optional language generation.
+
+This makes the project a strong Python fundamentals signal.
+
+## Hiring Signal
+
+CodeWalk proves:
+
+- Python `ast` usage
+- CLI design
+- static analysis thinking
+- testable parsing
+- Markdown generation
+- maintainability checks
+- optional LLM integration
+
+## Core User Story
+
+As a junior developer, I can run:
+
+```bash
+codewalk explain app/main.py --output docs/main-walkthrough.md
+```
+
+and receive:
+
+- module summary
+- import list
+- class/function breakdown
+- argument and return notes
+- warnings
+- suggested tests
+
+## MVP Features
+
+- Typer CLI
+- parse one Python file
+- extract imports, functions, classes, arguments, decorators, docstrings
+- detect missing docstrings
+- detect broad `except`
+- detect long functions
+- generate Markdown report
+- pytest fixture tests
+
+## Stretch Features
+
+- repo-level scan
+- dependency graph
+- pytest skeleton generation
+- complexity via Radon
+- optional LLM explanation using AST facts
+
+## Architecture
+
+```text
+CLI
+  -> Parser
+  -> Analyzer
+  -> ReportModel
+  -> MarkdownRenderer
+  -> output file
+```
+
+## Output Sections
+
+- module overview
+- imports
+- functions
+- classes
+- warnings
+- suggested tests
+- optional beginner explanation
+
+## Testing Strategy
+
+- parser tests using fixture files
+- analyzer tests for each warning type
+- Markdown snapshot tests
+- CLI smoke tests
+- invalid Python syntax test
+
+## Interview Story
+
+I built CodeWalk to show that AI code explanation should start with reliable program structure. Python's AST gives deterministic facts, and the LLM is only used for wording, not for discovering the code structure.
+
+## Resume Bullet
+
+Built a Python static-analysis CLI using `ast` to explain code structure, detect maintainability issues, and generate Markdown walkthroughs with pytest-backed parser and analyzer behavior.

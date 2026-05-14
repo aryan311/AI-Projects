@@ -1,0 +1,3 @@
+this is not valid python @@@ def class if
+    random garbage {{ }}
+    123 abc !!!
