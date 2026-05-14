@@ -48,7 +48,7 @@ graph LR
 
 ### Local Installation (for Development)
 ```bash
-cd 02-tracelab
+cd Trace Lab
 pip install -e ".[dev]"
 ```
 
@@ -57,7 +57,7 @@ pip install -e ".[dev]"
 The easiest way to run the full stack is using Docker Compose:
 
 ```bash
-cd 02-tracelab
+cd Trace Lab
 docker compose up --build -d
 ```
 
