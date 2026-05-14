@@ -41,7 +41,7 @@ graph LR
 
 ### 2. Start PostgreSQL
 ```bash
-cd 01-querypilot
+cd Query Pilot
 docker compose up -d postgres
 ```
 
