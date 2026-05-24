@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsRoom Agents</title>
+    <meta name="description" content="A2A News Briefing Pipeline">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>NewsRoom Agents</h1>
+            <p>Google A2A SDK-style AI workflow for automated news briefing</p>
+        </header>
+
+        <section class="input-section glass-panel">
+            <div class="input-group">
+                <input type="text" id="topic-input" placeholder="Enter a topic (e.g., Python AI, SpaceX, Economy)" value="OpenAI">
+                <button id="generate-btn">Generate Briefing</button>
+            </div>
+        </section>
+
+        <section class="workflow-section" id="workflow-section" style="display: none;">
+            <h2>Agent Pipeline execution</h2>
+            <div class="timeline" id="timeline">
+                <!-- Timeline items injected here -->
+            </div>
+        </section>
+
+        <section class="results-section glass-panel" id="results-section" style="display: none;">
+            <h2>Final Briefing</h2>
+            <div id="briefing-content" class="markdown-content">
+                <!-- Markdown rendered briefing -->
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
