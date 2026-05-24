@@ -77,9 +77,10 @@ All agents communicate through typed models:
 - duplicate removal tests
 - source link presence tests
 
-## Interview Story
+## Steps to run
 
-I built this to show A2A-style collaboration without pretending agent complexity is valuable by itself. Each agent has a clear contract, and the final answer remains source-linked.
+- python main.py
+- open localhost:8000 and enter topic to search
 
 ## Resume Bullet
 
