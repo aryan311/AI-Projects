@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FileWise</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --line: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --good: #34d399;
+    --bad: #f87171;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    padding: 18px 24px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  header h1 { margin: 0; font-size: 18px; }
+  header .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  main { max-width: 960px; margin: 0 auto; padding: 24px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  input[type="text"], textarea {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px;
+    font-family: inherit; font-size: 14px;
+  }
+  textarea { min-height: 60px; resize: vertical; }
+  button {
+    padding: 8px 14px; background: var(--accent); color: #0f172a;
+    border: 0; border-radius: 6px; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: progress; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > input[type="text"] { flex: 1; }
+  .docs ul { margin: 0; padding-left: 18px; }
+  .docs li { font-family: var(--mono); font-size: 13px; }
+  .docs .doc-name { color: var(--text); }
+  .docs .doc-meta { color: var(--muted); margin-left: 8px; }
+  .docs button.del {
+    background: transparent; color: var(--bad); border: 1px solid var(--bad);
+    padding: 2px 8px; font-size: 11px; margin-left: 8px;
+  }
+  .answer .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .pill.answered { background: rgba(52,211,153,0.15); color: var(--good); }
+  .pill.refused { background: rgba(248,113,113,0.15); color: var(--bad); }
+  .answer-text { font-size: 16px; margin: 12px 0; }
+  .citation {
+    border-left: 3px solid var(--accent); padding: 6px 0 6px 12px;
+    margin: 8px 0; font-size: 13px;
+  }
+  .citation .src { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .citation .snippet { white-space: pre-wrap; color: var(--text); margin-top: 4px; }
+  .score { font-family: var(--mono); color: var(--accent); }
+  .retrieval { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .err { color: var(--bad); }
+  .examples button { background: transparent; border: 1px solid var(--line); color: var(--muted); margin: 2px 4px 2px 0; font-size: 12px; font-weight: 400; }
+  .examples button:hover { color: var(--text); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>FileWise — citation-first RAG</h1>
+  <div class="meta" id="status-meta">loading…</div>
+</header>
+<main>
+
+  <section class="card docs">
+    <h2>Documents</h2>
+    <ul id="doc-list"><li class="empty">loading…</li></ul>
+    <form id="upload-form" style="margin-top: 12px;">
+      <div class="row">
+        <input type="file" id="file-input" accept=".pdf,.txt,.md,.markdown" />
+        <button type="submit">Upload</button>
+      </div>
+      <div class="err" id="upload-err"></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Ask</h2>
+    <form id="ask-form">
+      <textarea id="query" placeholder="What is the leave policy?"></textarea>
+      <div class="row" style="margin-top: 8px;">
+        <button type="submit" id="ask-btn">Ask</button>
+        <label class="row" style="font-size: 12px; color: var(--muted); margin-left: auto;">
+          k: <input type="number" id="k-input" value="5" min="1" max="20" style="width: 60px; margin-left: 4px;" />
+        </label>
+        <label class="row" style="font-size: 12px; color: var(--muted);">
+          threshold: <input type="number" id="threshold-input" value="0.35" step="0.05" min="-1" max="1" style="width: 70px; margin-left: 4px;" />
+        </label>
+      </div>
+    </form>
+    <div class="examples" style="margin-top: 10px;">
+      <span style="color: var(--muted); font-size: 12px;">try:</span>
+      <button type="button" data-q="What is the leave policy?">leave policy</button>
+      <button type="button" data-q="Where is the office?">office address</button>
+      <button type="button" data-q="What are the password requirements?">password rules</button>
+      <button type="button" data-q="What known issues exist after v2.3.0?">known issues</button>
+      <button type="button" data-q="What is the airspeed of an unladen swallow?">unanswerable</button>
+    </div>
+  </section>
+
+  <section class="card answer" id="answer-card" style="display: none;">
+    <h2>Answer</h2>
+    <div id="answer-body"></div>
+  </section>
+
+</main>
+
+<script>
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => ({}));
+  return { ok: r.ok, status: r.status, body };
+}
+
+async function refreshDocs() {
+  const r = await api("/documents");
+  const ul = document.getElementById("doc-list");
+  if (!r.ok || !r.body.documents) {
+    ul.innerHTML = '<li class="empty err">' + (r.body.error || "failed to load") + '</li>';
+    return;
+  }
+  if (r.body.documents.length === 0) {
+    ul.innerHTML = '<li class="empty" style="color: var(--muted)">no documents uploaded</li>';
+    return;
+  }
+  ul.innerHTML = r.body.documents.map(d => `
+    <li>
+      <span class="doc-name">${escapeHtml(d.name)}</span>
+      <span class="doc-meta">${d.pages || "?"} pages · ${d.chunks || "?"} chunks</span>
+      <button class="del" data-id="${d.document_id}">delete</button>
+    </li>
+  `).join("");
+  ul.querySelectorAll("button.del").forEach(btn => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      await api(`/documents/${btn.dataset.id}`, { method: "DELETE" });
+      refreshDocs();
+    };
+  });
+}
+
+async function refreshMeta() {
+  const r = await api("/healthz");
+  document.getElementById("status-meta").textContent =
+    r.ok ? `v${r.body.version} · ${r.body.embedder || ""} · ${r.body.llm || ""}` : "offline";
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderAnswer(body) {
+  const card = document.getElementById("answer-card");
+  card.style.display = "block";
+  const refused = body.status !== "answered";
+  const pillClass = refused ? "refused" : "answered";
+  const pillText = refused ? "not enough evidence" : "answered";
+  const cites = (body.citations || []).map(c => `
+    <div class="citation">
+      <div class="src">${escapeHtml(c.doc)}${c.page ? ` · p.${c.page}` : ""}${c.section ? ` · ${escapeHtml(c.section)}` : ""} <span class="score">${c.score.toFixed(3)}</span></div>
+      <div class="snippet">${escapeHtml(c.snippet)}</div>
+    </div>
+  `).join("");
+  const ret = body.retrieval || {};
+  document.getElementById("answer-body").innerHTML = `
+    <span class="pill ${pillClass}">${pillText}</span>
+    <div class="answer-text">${body.answer ? escapeHtml(body.answer) : (body.hint || "")}</div>
+    ${cites || (refused ? "" : "<em>no citations</em>")}
+    <div class="retrieval">k=${ret.k} · threshold=${ret.threshold} · max_score=${(ret.max_score || 0).toFixed(3)}</div>
+  `;
+}
+
+document.getElementById("upload-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const input = document.getElementById("file-input");
+  const errEl = document.getElementById("upload-err");
+  errEl.textContent = "";
+  if (!input.files.length) return;
+  const fd = new FormData();
+  fd.append("file", input.files[0]);
+  const r = await fetch("/documents", { method: "POST", body: fd });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    errEl.textContent = `${body.error || "upload failed"}: ${body.detail || ""}`;
+    return;
+  }
+  input.value = "";
+  refreshDocs();
+};
+
+document.getElementById("ask-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("ask-btn");
+  const q = document.getElementById("query").value.trim();
+  if (!q) return;
+  const payload = {
+    query: q,
+    k: parseInt(document.getElementById("k-input").value, 10),
+    threshold: parseFloat(document.getElementById("threshold-input").value),
+  };
+  btn.disabled = true; btn.textContent = "Asking…";
+  const r = await api("/ask", {
+    method: "POST",
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify(payload),
+  });
+  btn.disabled = false; btn.textContent = "Ask";
+  if (r.ok) renderAnswer(r.body);
+  else renderAnswer({ status: "not_enough_evidence", answer: r.body.error || "error", citations: [], retrieval: {} });
+};
+
+document.querySelectorAll(".examples button").forEach(b => {
+  b.onclick = () => {
+    document.getElementById("query").value = b.dataset.q;
+    document.getElementById("ask-form").dispatchEvent(new Event("submit"));
+  };
+});
+
+refreshMeta();
+refreshDocs();
+</script>
+</body>
+</html>

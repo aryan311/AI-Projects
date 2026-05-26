@@ -1,0 +1,14 @@
+- question: "What is the leave policy?"
+  must_contain: "21 days paid leave"
+  min_score: 0.15
+
+- question: "Where is the office located?"
+  must_contain: "221B Baker Street"
+  min_score: 0.15
+
+- question: "Can I work remotely?"
+  must_contain: "three days per week"
+  min_score: 0.15
+
+- question: "What is the airspeed of an unladen swallow?"
+  expect_refusal: true

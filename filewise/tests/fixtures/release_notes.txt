@@ -1,0 +1,16 @@
+Acme Release Notes — v2.3.0
+
+Date: 2026-04-12
+
+New features
+- Single sign-on with Okta
+- Audit log export to CSV
+- Optional dark mode
+
+Bug fixes
+- Fixed crash when uploading documents larger than 10MB
+- Fixed timezone offset on the dashboard
+
+Known issues
+- Search may be slow on the first query after deploy
+- Mobile layout has minor padding glitches on iOS Safari

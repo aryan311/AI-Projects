@@ -1,0 +1,40 @@
+# E2E retrieval regression set.
+# Each row: question, expected doc name, expected substring in top citation
+# OR expect_refusal: true for known unanswerable queries.
+
+handbook_md:
+  - question: "What is the leave policy?"
+    must_contain: "21 days paid leave"
+  - question: "Where is the office located?"
+    must_contain: "221B Baker Street"
+  - question: "Can I work remotely?"
+    must_contain: "three days per week"
+  - question: "What happens if someone harasses an employee?"
+    must_contain: "disciplinary action"
+  - question: "What is the airspeed of an unladen swallow?"
+    expect_refusal: true
+
+handbook_pdf:
+  - question: "How many days of paid leave do employees get?"
+    must_contain: "21 days paid leave"
+    expected_page: 1
+  - question: "Where is the Acme office?"
+    must_contain: "Baker Street"
+    expected_page: 2
+  - question: "How should harassment be handled?"
+    must_contain: "disciplinary action"
+    expected_page: 3
+
+security_pdf:
+  - question: "What are the password requirements?"
+    must_contain: "12 characters"
+    expected_page: 1
+  - question: "How quickly must security incidents be reported?"
+    must_contain: "15"
+    expected_page: 2
+
+release_notes_txt:
+  - question: "What new features shipped in v2.3.0?"
+    must_contain: "Okta"
+  - question: "What known issues exist after v2.3.0?"
+    must_contain: "first query"
